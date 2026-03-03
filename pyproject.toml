@@ -1,0 +1,25 @@
+[project]
+name = "techdocllm"
+version = "0.1.0"
+description = "RAG-система для Q&A по технической документации FastStream"
+readme = "README.md"
+requires-python = ">=3.12"
+
+authors = [
+  { name = "Иван Ткаченко", email = "i.tkachenko@zohomail.eu" },
+  { name = "Данил Богатов", email = "danil.boghatov17@yandex.ru" },
+]
+
+license = { text = "MIT" }
+
+dependencies = [
+    "fastapi>=0.135.1",
+    "uvicorn>=0.41.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.19.1",
+    "pre-commit>=4.5.1",
+    "ruff>=0.15.4",
+]
