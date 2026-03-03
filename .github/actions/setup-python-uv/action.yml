@@ -1,0 +1,31 @@
+name: "Setup Python & UV"
+description: "Sets up Python, UV, and caches dependencies"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version-file: "pyproject.toml"
+
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: false
+
+    - name: Cache uv + virtualenv
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/uv
+          .venv
+        key: venv-${{ runner.os }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('uv.lock') }}
+        restore-keys: |
+          venv-${{ runner.os }}-${{ hashFiles('pyproject.toml') }}-
+
+    - name: Sync dependencies (frozen)
+      shell: bash
+      env:
+        UV_PROJECT_ENVIRONMENT: ".venv"
+      run: uv sync --frozen
