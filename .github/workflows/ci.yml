@@ -32,10 +32,22 @@ jobs:
       - name: Setup Python & UV
         uses: ./.github/actions/setup-python-uv
 
+      - name: Load environment from .env
+        shell: bash
+        run: |
+          if [ -f .env ]; then
+            # Export only variables we actually use in CI
+            while IFS='=' read -r name value; do
+              case "$name" in
+                DATABASE_URL|CODECOV_TOKEN)
+                  echo "$name=$value" >> "$GITHUB_ENV"
+                  ;;
+              esac
+            done < <(grep -E '^(DATABASE_URL|CODECOV_TOKEN)=' .env || true)
+          fi
+
       - name: Run tests (coverage)
         run: uv run pytest tests/ --cov=app --cov-report=xml --cov-report=term-missing
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
@@ -43,7 +55,7 @@ jobs:
           files: ./coverage.xml
           fail_ci_if_error: false
         env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          CODECOV_TOKEN: ${{ env.CODECOV_TOKEN }}
 
   security:
     name: Security Scan
@@ -52,10 +64,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Load environment from .env
+        shell: bash
+        run: |
+          if [ -f .env ]; then
+            while IFS='=' read -r name value; do
+              case "$name" in
+                SNYK_TOKEN)
+                  echo "$name=$value" >> "$GITHUB_ENV"
+                  ;;
+              esac
+            done < <(grep -E '^SNYK_TOKEN=' .env || true)
+          fi
+
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/python@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=high
 
