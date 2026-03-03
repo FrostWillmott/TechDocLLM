@@ -28,4 +28,4 @@ runs:
       shell: bash
       env:
         UV_PROJECT_ENVIRONMENT: ".venv"
-      run: uv sync --frozen
+      run: uv sync --frozen --group dev --group test
